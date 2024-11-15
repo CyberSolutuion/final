@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="login.css">
+    <link rel="icon" href="img/security_1909748.png" type="image/png">
+    <title>CyberSolution</title>
+</head>
+<body>
+<div class="conteiner">
+    <div class="forms_login">
+        <form id="loginForm" action="http://localhost:3000/login" method="post">
+            <div class="form-header">
+                <div class="title">
+                    <h1>Login</h1>
+                </div>
+                <div class="cadastro-button">
+                    <button type="button"><a href="cadastro.html">Cadastre-se</a></button>
+                </div>
+            </div>
+            <div class="input-group">
+                <div class="input-box">
+                    <label for="user">Usuario</label>
+                    <input id="user" type="text" name="user" placeholder="Digite seu Usuario" required>
+                </div>
+                <div class="input-box">
+                    <label for="password">Senha</label>
+                    <input id="password" type="password" name="password" placeholder="Digite sua senha" required>
+                </div>
+            </div>
+            <div class="confirm-button">
+                <button type="submit">FAZER LOGIN</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    
+    document.querySelector('#loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        
+        const user = document.getElementById('user').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('http://localhost:3000/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user, password })
+            });
+
+            const result = await response.json();
+            console.log("Resposta do servidor:", result);
+
+            if (response.ok) {
+    alert(result.message);
+
+    // Salva os dados do usuário no localStorage
+    localStorage.setItem('user_id', result.user.id);
+    localStorage.setItem('user_name', result.user.name); // Armazena o nome do usuário
+    localStorage.setItem('user_creation_date', result.user.creation_date); // Armazena a data de criação
+
+    window.location.href = 'feed.html';  // Redireciona para a página de feed
+} else {
+    alert(`Erro: ${result.error}`);
+}
+
+        } catch (error) {
+            console.error("Erro na requisição:", error);
+            alert("Erro ao conectar com o servidor. Verifique a conexão e tente novamente.");
+        }
+    });
+
+
+</script>
+
+</body>
+</html>

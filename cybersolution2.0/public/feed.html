@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed de Colaborações</title>
+    <link rel="stylesheet" href="feed.css">
+    <link rel="icon" href="img/security_1909748.png" type="image/png">
+    <script>
+        
+        if (!localStorage.getItem('user_id')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+
+<body>
+<header class="navbar">
+    <div class="logo">
+        <img src="img/security_1909748.png"  alt="Logo" width="40" id="imglogo">
+        <span>CyberSolution</span>
+    </div>
+
+    <div class="profile-toggle" onclick="toggleProfileMenu()">Perfil</div>
+</header>
+
+<aside class="profile-menu" id="profileMenu">
+    <h2>Perfil do Usuário</h2>
+    <p><strong>Nome:</strong> <span id="profileName">[Nome do Usuário]</span></p>
+    <p><strong>Data de Criação da Conta:</strong> <span id="profileCreationDate">[Data]</span></p>
+    <button onclick="toggleProfileMenu()" class="button_fechar">Fechar</button>
+    <button onclick="logout()">SAIR</button>
+</aside>
+
+<div class="container">
+    <h1>Colaborações</h1>
+    <p id="welcomeMessage"></p>
+
+    <div class="publish-form">
+        <form id="publicationForm">
+            <label for="category">Categoria:</label>
+            <select id="category" name="category" required>
+                <option value="artigo">Artigo</option>
+                <option value="script">Script</option>
+                <option value="documentacao">Documentação</option>
+            </select>
+
+            <label for="description">Descrição:</label>
+            <textarea id="description" name="description" placeholder="Escreva uma descrição..." required></textarea>
+
+            <label for="upload">Upload de Arquivo:</label>
+            <input type="file" id="upload" name="file" required>
+
+            <button type="submit">Publicar</button>
+        </form>
+    </div>
+
+    <div class="feed" id="feed"></div>
+</div>
+
+<script>
+    function logout() {
+
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_name');  
+    localStorage.removeItem('user_creation_date');
+    console.log("Logout concluído com sucesso!");
+    alert("Logout realizado com sucesso!");
+    setTimeout(() => {
+        window.location.href = 'login.html';
+    }, 100);
+
+}
+    // Função para carregar e exibir o perfil do usuário
+    function carregarPerfilUsuario() {
+        const userName = localStorage.getItem('user_name');
+        const userCreationDate = localStorage.getItem('user_creation_date');
+
+        if (userName) {
+            document.getElementById('profileName').textContent = userName;
+            document.getElementById('welcomeMessage').textContent = `Bem-vindo(a), ${userName}! Faça sua colaboração e compartilhe seus conhecimentos com a comunidade.`;
+        }
+        if (userCreationDate) {
+            document.getElementById('profileCreationDate').textContent = userCreationDate;
+        }
+        
+    }
+
+    // Função para enviar uma nova publicação
+    async function publicar(event) {
+        event.preventDefault();
+
+        const form = document.getElementById('publicationForm');
+        const formData = new FormData(form);
+
+        const user_id = localStorage.getItem('user_id');
+        if (!user_id) {
+            alert("Erro: usuário não está logado.");
+            return;
+        }
+        formData.append('user_id', user_id);
+
+        try {
+            const response = await fetch('http://localhost:3000/publication', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("Publicação realizada com sucesso!");
+                carregarPublicacoes();  // Recarrega as publicações após publicar
+            } else {
+                alert(`Erro: ${result.error}`);
+            }
+        } catch (error) {
+            console.error("Erro na publicação:", error);
+            alert("Erro ao conectar com o servidor.");
+        }
+    }
+
+    // Função para carregar as publicações e exibi-las no feed
+    async function carregarPublicacoes() {
+        try {
+            const response = await fetch('http://localhost:3000/publications');
+            const publicacoes = await response.json();
+
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '';  // Limpa o feed antes de carregar as novas publicações
+
+            publicacoes.forEach(pub => {
+                const div = document.createElement('div');
+                div.className = 'publicacao';
+                div.innerHTML = `
+                    <strong>Usuário:</strong> ${pub.users.username} <br>
+                    <strong>Categoria:</strong> ${pub.category} <br>
+                    <strong>Descrição:</strong> ${pub.description} <br>
+                    <strong>Arquivo:</strong> <a href="${pub.file_path}" target="_blank">Baixar</a>
+                `;
+                feed.appendChild(div);
+            });
+        } catch (error) {
+            console.error("Erro ao carregar publicações:", error);
+        }
+    }
+
+    // Alterna a visibilidade do menu de perfil
+    function toggleProfileMenu() {
+        const profileMenu = document.getElementById('profileMenu');
+        profileMenu.classList.toggle('open');
+    }
+
+    // Adiciona o evento de submissão ao formulário
+    document.getElementById('publicationForm').addEventListener('submit', publicar);
+
+    // Carrega o perfil do usuário e as publicações quando a página é aberta
+    window.onload = function() {
+        carregarPerfilUsuario();
+        carregarPublicacoes();
+    };
+</script>
+</body>
+</html>

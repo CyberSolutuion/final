@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="cadastro.css">
+    <link rel="icon" href="img/security_1909748.png" type="image/png">
+    <title>CyberSolution</title>
+</head>
+<body>
+    
+<div class="conteiner">
+
+    <div class="forms_cadastro">
+
+        <form action="/register" method="post">
+            <div class="form-header">
+                <div class="title">
+                    <h1>Cadastre-se</h1>
+                </div>
+                <div class="login-button">
+                    <button> <a href="login.html">Entrar</a></button>
+                </div>
+            </div>
+        <div class="input-group">
+
+            <div class="input-box">
+                <label for="user-name">Nome de Usuario</label>
+                <input id="user-name" type="text" name="username" placeholder="Digite seu nome de Usuario" required>
+            </div>
+
+            <div class="input-box">
+                <label for="email">E-mail</label>
+                <input id="email" type="email" name="email" placeholder="Digite seu email" required>
+            </div>
+
+            <div class="input-box">
+                <label for="password">Senha</label>
+                <input id="password" type="password" name="password" placeholder="Digite sua senha" required>
+            </div>
+
+            <div class="input-box">
+                <label for="Confirmpassword">Confirme sua senha</label>
+                <input id="Confirmpassword" type="password" name="Confirmpassword" placeholder="Digite sua senha" required>
+            </div>
+</div>
+            <div class="confirm-button">
+                <button type="submit">CADASTRE-SE</button>
+            
+            </div>
+        </form>
+
+    </div>
+</div>
+<script>
+    document.querySelector('form').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+
+        // Converte FormData para um objeto JSON
+        const data = Object.fromEntries(formData.entries());
+        console.log('Dados enviados:', data);
+
+        const response = await fetch(form.action, {
+            method: form.method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(result.message);
+            console.log('Redirecionando para login.html'); 
+            window.location.href = 'login.html'; 
+        } else {
+            alert(`Erro: ${result.error}`);
+            console.error('Erro na resposta:', result.error); // Adiciona um log de erro para depuração
+        }
+    });
+</script>
+
+
+</body>
+</html>
